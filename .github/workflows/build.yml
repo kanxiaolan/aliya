@@ -60,8 +60,8 @@ jobs:
         <?xml version="1.0" encoding="utf-8"?>
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <uses-permission android:name="android.permission.INTERNET" />
-            <application android:allowBackup="true" android:label="念念" android:theme="@android:style/Theme.NoTitleBar">
-                <activity android:name=".MainActivity" android:exported="true">
+            <application android:allowBackup="true" android:label="念念" android:usesCleartextTraffic="true" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+                <activity android:name=".MainActivity" android:exported="true" android:configChanges="orientation|screenSize|keyboardHidden">
                     <intent-filter>
                         <action android:name="android.intent.action.MAIN" />
                         <category android:name="android.intent.category.LAUNCHER" />
@@ -75,15 +75,32 @@ jobs:
         import android.os.Bundle
         import android.webkit.WebView
         import android.webkit.WebViewClient
+        import android.webkit.WebChromeClient
         import android.app.Activity
+        import android.widget.TextView
+        import android.graphics.Color
+
         class MainActivity : Activity() {
             override fun onCreate(savedInstanceState: Bundle?) {
                 super.onCreate(savedInstanceState)
-                val webView = WebView(this)
-                webView.settings.javaScriptEnabled = true
-                webView.webViewClient = WebViewClient()
-                webView.loadUrl("http://47.122.110.32:8000")
-                setContentView(webView)
+                try {
+                    val webView = WebView(this)
+                    webView.settings.javaScriptEnabled = true
+                    webView.settings.domStorageEnabled = true
+                    webView.settings.allowFileAccess = true
+                    webView.settings.allowContentAccess = true
+                    webView.webViewClient = WebViewClient()
+                    webView.webChromeClient = WebChromeClient()
+                    webView.loadUrl("http://47.122.110.32:8000")
+                    setContentView(webView)
+                } catch (e: Exception) {
+                    val tv = TextView(this)
+                    tv.text = "闪退被拦截！错误原因：\n\n" + e.toString()
+                    tv.setTextColor(Color.RED)
+                    tv.textSize = 16f
+                    tv.setPadding(30, 30, 30, 30)
+                    setContentView(tv)
+                }
             }
         }
         EOF
