@@ -14,5 +14,66 @@ jobs:
     - uses: android-actions/setup-android@v3
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+    - name: Create Project Files
+      run: |
+        mkdir -p app/src/main/java/com/niannian/app
+        cat << 'EOF' > settings.gradle
+        rootProject.name = "NianNianApp"
+        include ':app'
+        EOF
+        cat << 'EOF' > build.gradle
+        plugins {
+            id 'com.android.application' version '8.2.0' apply false
+        }
+        EOF
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application'
+        }
+        android {
+            namespace 'com.niannian.app'
+            compileSdk 34
+            defaultConfig {
+                applicationId "com.niannian.app"
+                minSdk 24
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
+        }
+        EOF
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <application android:allowBackup="true" android:label="念念" android:theme="@android:style/Theme.NoTitleBar">
+                <activity android:name=".MainActivity" android:exported="true">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+            </application>
+        </manifest>
+        EOF
+        cat << 'EOF' > app/src/main/java/com/niannian/app/MainActivity.kt
+        package com.niannian.app
+        import android.os.Bundle
+        import android.webkit.WebView
+        import android.webkit.WebViewClient
+        import android.app.Activity
+        class MainActivity : Activity() {
+            override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+                val webView = WebView(this)
+                webView.settings.javaScriptEnabled = true
+                webView.webViewClient = WebViewClient()
+                webView.loadUrl("http://47.122.110.32:8000")
+                setContentView(webView)
+            }
+        }
+        EOF
+    - name: Generate Wrapper
+      run: gradle wrapper --gradle-version 8.2
     - name: Build with Gradle
-      run: gradle assembleDebug
+      run: ./gradlew assembleDebug
